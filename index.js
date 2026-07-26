@@ -3,7 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 8000;
 // Middleware---
 app.use(cors());
 app.use(express.json());
@@ -24,20 +24,15 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
         // Connect MongoDB---
-        await client.connect();
+        // await client.connect();
 
         const database = client.db(process.env.DB_NAME);
         const contactCollection = database.collection("contacts");
         const reviewCollection = database.collection("reviews");
         console.log("✅ MongoDB Connected");
 
-        // Home Route---
-        app.get("/", (req, res) => {
-            res.send({
-                success: true,
-                message: "Portfolio Backend Running"
-            });
-        });
+       
+
 
 
         // review---
@@ -143,6 +138,14 @@ async function run() {
     }
 }
 run().catch(console.dir);
+
+app.get("/", (req, res) => {
+    res.send({
+        success: true,
+        message: "Portfolio API is running successfully 🚀",
+    });
+});
+
 
 app.listen(port, () => {
     console.log(`Srver is running on port ${port}`)
