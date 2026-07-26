@@ -76,7 +76,6 @@ async function run() {
         });
 
 
-
         // Save Contact Message---
         // app.post("/api/contact", async (req, res) => {
         //     const contact = req.body;
@@ -136,15 +135,16 @@ async function run() {
         //     res.send(result);
         // });
 
-    } catch (error) {
-        console.log(error);
+        // await client.db("admin").command({ ping: 1 });
+        console.log("Pinged your deployment. You successfully connected to MongoDB!");    
+    }
+    finally {
+        // await client.close();
     }
 }
+run().catch(console.dir);
 
-run();
-
-// Start Server
 app.listen(port, () => {
-    console.log(`🚀 Server running on port ${port}`);
-});
+    console.log(`Srver is running on port ${port}`)
+})
 
