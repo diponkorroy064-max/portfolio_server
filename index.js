@@ -31,7 +31,7 @@ async function run() {
         const reviewCollection = database.collection("reviews");
         console.log("✅ MongoDB Connected");
 
-       
+
 
 
 
@@ -55,7 +55,7 @@ async function run() {
                 const result = await reviewCollection
                     .find()
                     .sort({ createdAt: -1 }) // Newest first
-                    .limit(3)                // Get only the latest 3 reviews
+                    .limit(4)                // Get only the latest 4 reviews
                     .toArray();
                 res.send({
                     success: true,
@@ -72,66 +72,119 @@ async function run() {
 
 
         // Save Contact Message---
-        // app.post("/api/contact", async (req, res) => {
-        //     const contact = req.body;
+        app.post(["/api/contact", "/api/messages"], async (req, res) => {
+            try {
+                const contact = req.body;
 
-        //     if (
-        //         !contact.name ||
-        //         !contact.email ||
-        //         !contact.subject ||
-        //         !contact.message
-        //     ) {
-        //         return res.status(400).send({
-        //             success: false,
-        //             message: "All fields are required",
-        //         });
-        //     }
+                if (
+                    !contact.name ||
+                    !contact.email ||
+                    !contact.subject ||
+                    !contact.message
+                ) {
+                    return res.status(400).send({
+                        success: false,
+                        message: "All fields are required",
+                    });
+                }
 
-        //     contact.createdAt = new Date();
+                const newContact = {
+                    name: contact.name.trim(),
+                    email: contact.email.trim(),
+                    subject: contact.subject.trim(),
+                    message: contact.message.trim(),
+                    createdAt: new Date(),
+                };
 
-        //     const result = await contactCollection.insertOne(contact);
+                const result = await contactCollection.insertOne(newContact);
 
-        //     res.send({
-        //         success: true,
-        //         message: "Message sent successfully",
-        //         insertedId: result.insertedId,
-        //     });
-        // });
+                res.send({
+                    success: true,
+                    message: "Message sent successfully! Thank you for reaching out.",
+                    insertedId: result.insertedId,
+                });
+            } catch (error) {
+                res.status(500).send({
+                    success: false,
+                    message: "Failed to send message",
+                    error: error.message,
+                });
+            }
+        });
 
         // Get All Messages
-        // app.get("/api/contact", async (req, res) => {
-        //     const result = await contactCollection
-        //         .find()
-        //         .sort({ createdAt: -1 })
-        //         .toArray();
+        app.get(["/api/contact", "/api/messages"], async (req, res) => {
+            try {
+                const result = await contactCollection
+                    .find()
+                    .sort({ createdAt: -1 })
+                    .toArray();
 
-        //     res.send(result);
-        // });
+                res.send({
+                    success: true,
+                    data: result,
+                });
+            } catch (error) {
+                res.status(500).send({
+                    success: false,
+                    message: "Failed to fetch messages",
+                    error: error.message,
+                });
+            }
+        });
 
         // Get Single Message
-        // app.get("/api/contact/:id", async (req, res) => {
-        //     const id = req.params.id;
+        app.get(["/api/contact/:id", "/api/messages/:id"], async (req, res) => {
+            try {
+                const id = req.params.id;
+                const result = await contactCollection.findOne({
+                    _id: new ObjectId(id),
+                });
 
-        //     const result = await contactCollection.findOne({
-        //         _id: new ObjectId(id),
-        //     });
+                if (!result) {
+                    return res.status(404).send({
+                        success: false,
+                        message: "Message not found",
+                    });
+                }
 
-        //     res.send(result);
-        // });
+                res.send({
+                    success: true,
+                    data: result,
+                });
+            } catch (error) {
+                res.status(500).send({
+                    success: false,
+                    message: "Failed to fetch message",
+                    error: error.message,
+                });
+            }
+        });
 
         // Delete Message
-        // app.delete("/api/contact/:id", async (req, res) => {
-        //     const id = req.params.id;
+        app.delete(["/api/contact/:id", "/api/messages/:id"], async (req, res) => {
+            try {
+                const id = req.params.id;
+                const result = await contactCollection.deleteOne({
+                    _id: new ObjectId(id),
+                });
 
-        //     const result = await contactCollection.deleteOne({
-        //         _id: new ObjectId(id),
-        //     });
-
-        //     res.send(result);
-        // });
+                res.send({
+                    success: true,
+                    message: "Message deleted successfully",
+                    data: result,
+                });
+            } catch (error) {
+                res.status(500).send({
+                    success: false,
+                    message: "Failed to delete message",
+                    error: error.message,
+                });
+            }
+        });
 
         // await client.db("admin").command({ ping: 1 });
-        console.log("Pinged your deployment. You successfully connected to MongoDB!");    
+        console.log("Pinged your deployment. You successfully connected to MongoDB!");
     }
     finally {
         // await client.close();
